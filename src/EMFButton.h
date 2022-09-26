@@ -48,60 +48,49 @@ class EMFButton {
     }
 
     bool isReleased() {
-      return _released;  
+      return _released;
     }
-	    bool isHold() {
-      return _hold;
-    }
-	
-    uint8_t hasClicksWithHeld() {
-      return _clicksWithHeld - 1;
-    }
-	
-    uint8_t hasClicksWithHold() {
-      return isHold()? _clicks - 1 : 0;
-    }
-	
-    bool hasOnlyHold(){
+
+    bool hasOnlyHold() {
       return isHold() & _clicks == 1;
     }
-	
-    bool hasHoldAndSingle(){
-      return isHold() & _clicks == 2;
+
+    bool hasHoldAndSingle() {
+      return _clicksWithHold == 1;
     }
-	
-    bool hasHoldAndDouble(){
-      return isHold() & _clicks == 3;
+
+    bool hasHoldAndDouble() {
+      return _clicksWithHold == 2;
     }
-	
-    bool hasOnlyHeld(){
+
+    bool hasOnlyHeld() {
       return !_clicksWithHeld & _held;
     }
-	
-    bool hasHeldAndSingle(){
+
+    bool hasHeldAndSingle() {
       return _clicksWithHeld == 1;
     }
-	
-    bool hasHeldAndDouble(){
+
+    bool hasHeldAndDouble() {
       return _clicksWithHeld == 2;
     }
-    
-private:
-    bool _pinmode:1;
+
+  private:
+    bool _pinmode: 1;
     bool _pinclosed: 1;
-    bool _lastState:1;
-    bool _pressed:1;
-    bool _clicked:1;
+    bool _lastState: 1;
+    bool _pressed: 1;
+    bool _clicked: 1;
     bool _released: 1;
-    bool _held:1;
-    bool _hold:1;
+    bool _held: 1;
+    bool _hold: 1;
     uint8_t _pin;
-    uint8_t _clicks:4;
-    uint8_t _clicksEnd:4;
-    uint8_t _clicksWithHeld:4;
-    uint8_t _clicksWithHold:4;
-    enum button_state {await, pressed, held, released} mode:2;
-    uint32_t _timer;
-    uint32_t _lastChange;
-};
+    uint8_t _clicks: 4;
+    uint8_t _clicksEnd: 4;
+    uint8_t _clicksWithHeld: 4;
+    uint8_t _clicksWithHold: 4;
+    enum button_state {await, pressed, held, released} mode: 2;
+      uint32_t _timer;
+      uint32_t _lastChange;
+  };
 #endif

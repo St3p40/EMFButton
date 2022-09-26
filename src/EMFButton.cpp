@@ -1,5 +1,5 @@
 #include "EMFButton.h"
-void EMFbutton::tick() {
+void EMFButton::tick() {
   _clicked = 0;
   _held = 0;
   _hold = 0;
@@ -12,7 +12,7 @@ void EMFbutton::tick() {
   if (reading != _lastState) {
     _lastChange = t;
   }
-  if (t - _lastChange > SB_DEB_TIMER) {
+  if (t - _lastChange > EMFB_DEB_TIMER) {
     if (reading == (_pinclosed) ? _pressed : !_pressed) {
       _pressed = (_pinclosed) ? !reading : reading;
     }
@@ -26,7 +26,7 @@ void EMFbutton::tick() {
           _clicked = 1;
           break;
         case pressed:
-          if (t - _timer >= SB_HOLD_TIMER) {
+          if (t - _timer >= EMFB_HOLD_TIMER) {
             mode = held;
             _timer = t;
             _held = 1;
@@ -52,7 +52,7 @@ void EMFbutton::tick() {
             _clicks = 0;
           } else mode = released; _timer = t; _released = 1; break;
         case held: mode = await; _timer = t; _clicks = 0; _released = 1; break;
-        case released: if (t - _timer >= SB_RELEASE_TIMER) {
+        case released: if (t - _timer >= EMFB_RELEASE_TIMER) {
             mode = await;
             _timer = t;
             _clicksEnd = _clicks;
