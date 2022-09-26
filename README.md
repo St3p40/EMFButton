@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Tests](https://img.shields.io/github/languages/top/80Stepko08/EMFButton)
-![Tests](https://img.shields.io/badge/version-0.1.0-blue)
+![Tests](https://img.shields.io/badge/version-0.1.1-blue)
 ![Tests](https://img.shields.io/github/last-commit/80Stepko08/EMFButton)
 ## Comands
 ```cpp
