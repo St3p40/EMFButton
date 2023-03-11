@@ -1,0 +1,39 @@
+#######################################
+# Syntax Coloring Map For EMFButton
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+EMFButton	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+tick	KEYWORD2
+isPressed	KEYWORD2
+isReleased	KEYWORD2
+isClicked	KEYWORD2
+isHold	KEYWORD2
+isHeld	KEYWORD2
+
+hasClicks	KEYWORD2
+hasClicksWithHeld	KEYWORD2
+hasClicksWithHold	KEYWORD2
+hasSingle	KEYWORD2
+hasDouble	KEYWORD2
+hasTriple	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+HIGH_P	LITERAL1
+LOW_P	LITERAL1
+NORM_OPEN	LITERAL1
+NORM_CLOSED	LITERAL1
+EMFB_DEB_TIMER	LITERAL1
+EMFB_HOLD_TIMER	LITERAL1
+EMFB_RELEASE_TIMER	LITERAL1

@@ -1,6 +1,6 @@
 #include "EMFButton.h"
 
-EMFButton btn (3, 0);
+EMFButton btn (3, HIGH_P);
 
 void setup() {
   Serial.begin(9600);

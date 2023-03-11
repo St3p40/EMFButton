@@ -1,96 +1,83 @@
-#ifndef E_M_F_BUTTON_H
-#define E_M_F_BUTTON_H
+#ifndef EMFB_BUTTON_H
+#define EMFB_BUTTON_H
 #include "Arduino.h"
 
 #define EMFB_DEB_TIMER 50
 #define EMFB_HOLD_TIMER 500
 #define EMFB_RELEASE_TIMER 500
 
+#define HIGH_P 0
+#define LOW_P 1
+#define NORM_OPEN 0
+#define NORM_CLOSED 1
+
+#pragma pack(push,1)
+typedef struct {
+  bool pinmode: 1;
+  bool pinclosed: 1;
+  bool lastState: 1;
+  bool pressed: 1;
+  bool clicked: 1;
+  bool released: 1;
+  bool held: 1;
+  bool hold: 1;
+} EMFB_flags;
+#pragma pack(pop)
+
 class EMFButton {
   public:
-    EMFButton(uint8_t Npin) : _pin(Npin), _pinmode(0), _pinclosed(0) {
-      pinMode(_pin, INPUT);
-    };
-    EMFButton(uint8_t Npin, bool Npinmode) : _pin(Npin), _pinmode(Npinmode), _pinclosed(0) {
-      pinMode(_pin, (_pinmode) ? INPUT : INPUT_PULLUP);
-    };
-    EMFButton(uint8_t Npin, bool Npinmode, bool Npinclosed) : _pin(Npin), _pinmode(Npinmode), _pinclosed(Npinclosed) {
-      pinMode(_pin, (_pinmode) ? INPUT : INPUT_PULLUP);
-    };
+    EMFButton(uint8_t Npin, bool Npinmode = 0, bool Npinclosed = 0);
 
     void tick();
+
     bool isPressed() {
-      return _pressed;
+      return flag.pressed;
     }
-
     bool isClicked() {
-      return _clicked;
+      return flag.clicked;
     }
-
     bool isHeld() {
-      return _held;
+      return flag.held;
     }
-
     bool isHold() {
-      return _hold;
+      return flag.hold;
+    }
+    bool isReleased() {
+      return flag.released;
     }
 
     uint8_t hasClicks() {
       return _clicksEnd;
     }
-
     uint8_t hasClicksWithHeld() {
       return _clicksWithHeld;
     }
-
     uint8_t hasClicksWithHold() {
       return _clicksWithHold;
     }
 
-    bool isReleased() {
-      return _released;
+    bool hasSingle() {
+      return _clicksEnd == 1;
     }
-
-    bool hasOnlyHold() {
-      return isHold() & _clicks == 1;
+    bool hasDouble() {
+      return _clicksEnd == 2;
     }
-
-    bool hasHoldAndSingle() {
-      return _clicksWithHold == 1;
-    }
-
-    bool hasHoldAndDouble() {
-      return _clicksWithHold == 2;
-    }
-
-    bool hasOnlyHeld() {
-      return !_clicksWithHeld & _held;
-    }
-
-    bool hasHeldAndSingle() {
-      return _clicksWithHeld == 1;
-    }
-
-    bool hasHeldAndDouble() {
-      return _clicksWithHeld == 2;
+    bool hasTriple() {
+      return _clicksEnd == 3;
     }
 
   private:
-    bool _pinmode: 1;
-    bool _pinclosed: 1;
-    bool _lastState: 1;
-    bool _pressed: 1;
-    bool _clicked: 1;
-    bool _released: 1;
-    bool _held: 1;
-    bool _hold: 1;
+    EMFB_flags flag;
     uint8_t _pin;
+
     uint8_t _clicks: 4;
     uint8_t _clicksEnd: 4;
     uint8_t _clicksWithHeld: 4;
     uint8_t _clicksWithHold: 4;
+
     enum button_state {await, pressed, held, released} mode: 2;
-      uint32_t _timer;
-      uint32_t _lastChange;
-  };
+
+    uint16_t _timer;
+    uint16_t _lastChange;
+ };
 #endif
