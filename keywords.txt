@@ -25,7 +25,7 @@ hasClicksWithHeld	KEYWORD2
 hasClicksWithHold	KEYWORD2
 
 holdingTime	KEYWORD2
-holdInMillis	KEYWORD2
+holdinMillis	KEYWORD2
 hasSingle	KEYWORD2
 hasDouble	KEYWORD2
 hasTriple	KEYWORD2
