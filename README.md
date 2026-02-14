@@ -1,4 +1,4 @@
-# EMFButton
+# EasyMultiFunctionalButton
 
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Tests](https://img.shields.io/github/languages/top/80Stepko08/EMFButton)
@@ -44,7 +44,7 @@ void detach(action);                     // detaching function for this action
 ```
 ## Redefinition
 ```cpp
-// use this if you don't use Arduino framework or if you use alternative of these functions 
+// use this if you don't use Arduino framework or if you use alternative of these functions
 #define EMFB_SETUP_FUNC(pin, pinmode) pinMode(pin, (pinmode) ? INPUT : INPUT_PULLUP);
 #define EMFB_READ_FUNC(pin, pinmode) digitalRead(pin) == (pinmode) ? HIGH : LOW
 #define EMFB_MILLIS_FUNC millis()
@@ -56,3 +56,7 @@ void detach(action);                     // detaching function for this action
 #define EMFB_USE_CALLBACKS
 #define EMFB_WITHOUT_DEBOUNCE
 ```
+
+## This library is discontinued
+It was decided to stop adding new features to this library, there will be only bugfixes
+Anyways you can try https://github.com/St3p40/EmbButton as an alternative

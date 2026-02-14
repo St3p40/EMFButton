@@ -6,7 +6,7 @@
 //  ##          ##      #   ##          ##    # #   #  #    #    #   #  #   #
 // ######### # ##      # # ##        # ######   ###    ##   ##   ###   #   #
 // MADE BY ST3P40
-// Special thanks to Veto1d for 1.8 update
+// Special thanks to Veto1d for adding action callbacks
 #ifndef EMFB_BUTTON_H
 #define EMFB_BUTTON_H
 //==============================
@@ -46,8 +46,7 @@
 #define C_CLICKED 0
 #define C_RELEASED 1
 #define C_HELD 2
-#define WAS_C_CLICKED(times) times + 2
-#define IS_C_CLICKED(times) times + 17
+#define C_ENDCLICKS 3
 //=============================
 #pragma pack(push,1)
 typedef struct {
@@ -174,8 +173,6 @@ class EMFButton {
               _timer = t;
               _clicks = 1;
               flag.clicked = 1;
-              call(C_CLICKED);
-              call(IS_C_CLICKED(1));
               break;
 
             case pressed:
@@ -183,7 +180,6 @@ class EMFButton {
               {
                 mode = held;
                 flag.held = 1;
-                call(C_HELD);
               }
             break;
 
@@ -195,7 +191,6 @@ class EMFButton {
             mode = pressed;
             _timer = t;
             _clicks ++;
-            call(IS_C_CLICKED(_clicks));
             flag.clicked = 1;
           break;
          }
@@ -204,20 +199,21 @@ class EMFButton {
       {
         switch (mode)
         {
-          case pressed:  if (_clicks == 15)
-          {
+          case pressed:
+            flag.released = 1;
+            if (_clicks == 15)
+            {
               mode = await;
               _clicksEnd = _clicks;
               _clicks = 0;
-            } else mode = released; _timer = t; flag.released = 1; break;
+            } else { mode = released; _timer = t; } break;
 
-          case held: mode = await; _timer = t - _timer; _clicks = 0; flag.released = 1; break;
+          case held: { mode = await; _timer = t - _timer; _clicks = 0; flag.released = 1;} break;
 
           case released: if (t - _timer >= EMFB_RELEASE_TIMER) {
               mode = await;
               _timer = t;
               _clicksEnd = _clicks;
-              call(WAS_C_CLICKED(_clicks));
               _clicks = 0;
             } break;
         }
@@ -225,6 +221,12 @@ class EMFButton {
 #ifndef EMFB_WITHOUT_DEBOUNCE
     }
     flag.lastState = reading;
+#endif
+#ifdef EMFB_USE_CALLBACKS
+  if (flag.clicked) call(C_CLICKED);
+  if (flag.held) call(C_HELD);
+  if (flag.released) call(C_RELEASED);
+  if (_clicksEnd) call(C_ENDCLICKS);
 #endif
   };
 
@@ -241,13 +243,13 @@ class EMFButton {
 #ifndef EMFB_WITHOUT_DEBOUNCE
     uint16_t _lastChange;
 #endif
-    void (*_callback[33])() = {};
+#ifdef EMFB_USE_CALLBACKS
+    void (*_callback[4])() = {};
 
     void call(uint8_t id)
     {
-#ifdef EMFB_USE_CALLBACKS
       if (*_callback[id]) _callback[id]();
-#endif
     }
+#endif
 };
 #endif
