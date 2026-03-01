@@ -2,8 +2,10 @@
 
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Tests](https://img.shields.io/github/languages/top/St3p40/EMFButton)
-[![arduino-library-badge](https://www.ardu-badge.com/badge/EMFButton.svg?)](https://www.ardu-badge.com/EMFButton)
 ![Tests](https://img.shields.io/github/last-commit/St3p40/EMFButton)
+[![arduino-library-badge](https://www.ardu-badge.com/badge/EMFButton.svg?)](https://www.ardu-badge.com/EMFButton)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/80stepko08/library/EMFButton.svg)](https://registry.platformio.org/libraries/80stepko08/EMFButton)
+
 
 Button Press Handling Library
 - Works with normal open and closed buttons with pull-down and pull-up connection
@@ -24,27 +26,27 @@ void tick();                             // obligatory function(reading button s
 bool isPressed();                        // returns true if button is pressed
 bool isClicked();                        // returns true if button is clicked
 bool isReleased();                       // returns true if button is released
-bool isHeld();                           // returns true if button is pressed in timeout
-bool isHold();                           // returns true if button is pressed after timeout
+bool isHeld();                           // is true with hold timer trigger
+bool isHold();                           // returns true if button is still pressed after hold timer timeout
 // basic multiclicking
-bool hasSingle();                        // returns true if button is clicked once
-bool hasDouble();                        // returns true if button is clicked twice
-bool hasTriple();                        // returns true if button is clicked three times
+bool hasSingle();                        // returns true if button was clicked once
+bool hasDouble();                        // returns true if button was clicked twice
+bool hasTriple();                        // returns true if button was clicked three times
 // advanced multiclicking and holding
-uint8_t hasClicks();                     // returns clicks after releasing for a long time
-uint8_t hasClicksNow();                  // returns clicks
-uint8_t hasClicksWithHeld();             // returns clicks before pressing
-uint8_t hasClicksWithHold();             // returns clicks before holding
+uint8_t hasClicks();                     // returns clicks after click strike is end
+uint8_t hasClicksNow();                  // returns clicks during clicking
+uint8_t hasClicksWithHeld();             // returns clicks during isHeld
+uint8_t hasClicksWithHold();             // returns clicks with isHold
 // advanced holding
-uint16_t holdInMillis();                 // returns holding time after releasing (ms)
-uint16_t holdingTime();                  // returns pressing time (ms)
+uint16_t holdInMillis();                 // returns whole press time after releasing (ms)
+uint16_t holdingTime();                  // returns press time (ms)
 //callbacks
 void attach(action, function);           // attaching function for this action
 void detach(action);                     // detaching function for this action
 ```
 ## Options with defines
 ```cpp
-//Use defines BEFORE including the library
+//Use these defines BEFORE including the library
 
 // use this if you don't use Arduino framework or if you use alternative of these functions
 #define EMFB_SETUP_FUNC(pin, pinmode) pinMode(pin, (pinmode) ? INPUT : INPUT_PULLUP);

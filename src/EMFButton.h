@@ -73,11 +73,11 @@ class EMFButton {
     {
       return flag.clicked;
     }
-    bool isHeld()               //returns true if button is pressed in timeout
+    bool isHeld()               // returns true with hold timer trigger
     {
       return flag.held;
     }
-    bool isHold()               //returns true if button is pressed after timeout
+    bool isHold()               // returns true if button is still pressed after hold timer timeout
     {
       return mode == held;
     }
@@ -86,7 +86,7 @@ class EMFButton {
       return flag.released;
     }
 
-    uint8_t hasClicks()         //returns clicks after clicking strike ends
+    uint8_t hasClicks()         //returns clicks after clicking strike is end
     {
       return (flag.clicksEnd) ? _clicks : 0;
     }
@@ -94,11 +94,11 @@ class EMFButton {
     {
       return _clicks - flag.pressed;
     }
-    uint8_t hasClicksWithHeld() //returns clicks before holding
+    uint8_t hasClicksWithHeld() // returns clicks during isHeld
     {
       return (flag.held) ? _clicks - 1 : 0;
     }
-    uint8_t hasClicksWithHold() //returns clicks during holding
+    uint8_t hasClicksWithHold() // returns clicks with isHold
     {
       return isHold() ? _clicks - 1 : 0;
     }
@@ -112,15 +112,15 @@ class EMFButton {
       return (flag.released) ? EMFB_MILLIS_FUNC - _timer : 0;
     }
 
-    bool hasSingle()            //returns true if button is clicked once
+    bool hasSingle()            //returns true if button was clicked once
     {
       return hasClicks() == 1;
     }
-    bool hasDouble()            //returns true if button is clicked twice
+    bool hasDouble()            //returns true if button was clicked twice
     {
       return hasClicks() == 2;
     }
-    bool hasTriple()            //returns true if button is clicked three times
+    bool hasTriple()            //returns true if button was clicked three times
     {
       return hasClicks() == 3;
     }
