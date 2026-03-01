@@ -1,6 +1,6 @@
-#include "EMFButton.h"
+#include <EMFButton.h>
 
-EMFButton btn (3, HIGH_P);
+EMFButton btn (2, HIGH_P);
 
 void setup() {
   Serial.begin(9600);
@@ -16,10 +16,13 @@ void loop() {
 
   if (btn.isClicked())
     Serial.print("Clicked ");
-  
+
+  if (btn.isReleased())
+    Serial.println("Released:" + String(btn.holdinMillis()));
+
   if (btn.isHeld())
-    Serial.print("Hold " + String(btn.hasClicksWithHeld()) + "\n");
-  
+    Serial.print("Hold " + String(btn.hasClicksWithHeld()) + " ");
+
   if (btn.hasClicks())
     Serial.print("Clicks:" + String(btn.hasClicks()) + "\n");
 }
