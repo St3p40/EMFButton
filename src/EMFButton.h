@@ -144,6 +144,7 @@ class EMFButton {
     void tick()                 // obligatory function(reading button state)
     {
       uint16_t t = EMFB_MILLIS_FUNC;
+      bool reading = EMFB_READ_FUNC(_pin, flag.pinmode);
 
       flag.clicked = 0;
       flag.held = 0;
@@ -156,7 +157,6 @@ class EMFButton {
         _clicks = 0;
       };
 
-      bool reading = EMFB_READ_FUNC(_pin, flag.pinmode);
 #ifdef EMFB_WITHOUT_DEBOUNCE
       flag.pressed = reading;
 #else
@@ -172,12 +172,12 @@ class EMFButton {
       {
         switch (mode)
         {
-          case await:
+          case await: case released:
             mode = pressed;
             _timer = t;
-            _clicks = 1;
+            _clicks++;
             flag.clicked = 1;
-          break;
+            break;
 
           case pressed:
             if (t - _timer >= EMFB_HOLD_TIMER)
@@ -185,45 +185,33 @@ class EMFButton {
               mode = held;
               flag.held = 1;
             }
-          break;
-
-          case released:
-            mode = pressed;
-            _timer = t;
-            _clicks ++;
-            flag.clicked = 1;
-          break;
+            break;
         }
       }
       else
       {
         switch (mode)
         {
-          case pressed:
+          case pressed: case held:
             flag.released = 1;
-            if (_clicks == 15)
+            if (_clicks == 15 || mode == held)
             {
               mode = await;
-              flag.clicksEnd = 1;
+              _clicks *= (mode != held);
+              flag.clicksEnd =  (mode == !held);
             }
             else
             {
               mode = released;
             }
-          break;
-
-          case held:
-            mode = await;
-            _clicks = 0;
-            flag.released = 1;
-          break;
+           break;
 
           case released:
             if (t - _timer >= EMFB_RELEASE_TIMER) {
               mode = await;
               flag.clicksEnd = 1;
             }
-          break;
+           break;
         }
       }
 #ifndef EMFB_WITHOUT_DEBOUNCE
