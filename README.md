@@ -6,7 +6,7 @@
 ![Tests](https://img.shields.io/github/last-commit/80Stepko08/EMFButton)
 
 Button Press Handling Library
-- Works with normal opened and closed buttons with pull-down and pull-up connection
+- Works with normal open and closed buttons with pull-down and pull-up connection
 - Has own debounce that can be configured and deactivated
 - Pressing, multiclicking (up to 15 clicks), holding, releasing handling
 - Works with callbacks
@@ -42,8 +42,10 @@ uint16_t holdingTime();                  // returns pressing time (ms)
 void attach(action, function);           // attaching function for this action
 void detach(action);                     // detaching function for this action
 ```
-## Redefinition
+## Options with defines
 ```cpp
+//Use defines BEFORE including the library
+
 // use this if you don't use Arduino framework or if you use alternative of these functions
 #define EMFB_SETUP_FUNC(pin, pinmode) pinMode(pin, (pinmode) ? INPUT : INPUT_PULLUP);
 #define EMFB_READ_FUNC(pin, pinmode) digitalRead(pin) == (pinmode) ? HIGH : LOW
@@ -59,4 +61,5 @@ void detach(action);                     // detaching function for this action
 
 ## This library is discontinued
 It was decided to stop adding new features to this library, there will be only bugfixes
+
 Anyways you can try https://github.com/St3p40/EmbButton as an alternative

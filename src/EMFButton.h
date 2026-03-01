@@ -19,7 +19,7 @@
 #define EMFB_SETUP_FUNC(pin, pinmode) pinMode(pin, (pinmode) ? INPUT : INPUT_PULLUP)
 #endif
 #ifndef EMFB_READ_FUNC
-#define EMFB_READ_FUNC(pin, pinmode) digitalRead(pin) == (pinmode) ? HIGH : LOW
+#define EMFB_READ_FUNC(pin, pinmode) digitalRead(pin) ^ pinmode //== (pinmode) ? HIGH : LOW
 #endif
 #ifndef EMFB_MILLIS_FUNC
 #define EMFB_MILLIS_FUNC millis()
@@ -51,7 +51,6 @@
 #pragma pack(push,1)
 typedef struct {
   bool pinmode: 1;
-  bool pinclosed: 1;
 #ifndef EMFB_WITHOUT_DEBOUNCE
   bool lastState: 1;
 #endif
@@ -59,7 +58,7 @@ typedef struct {
   bool clicked: 1;
   bool released: 1;
   bool held: 1;
-  bool hold: 1;
+  bool clicksEnd: 1;
 } EMFB_flags;
 #pragma pack(pop)
 //============================
@@ -74,69 +73,68 @@ class EMFButton {
     {
       return flag.clicked;
     }
-    bool isHeld()               //returns true if button is released
+    bool isHeld()               //returns true if button is pressed in timeout
     {
       return flag.held;
     }
-    bool isHold()               //returns true if button is pressed in timeout
+    bool isHold()               //returns true if button is pressed after timeout
     {
-      return flag.hold;
+      return mode == held;
     }
-    bool isReleased()           //returns true if button is pressed after timeout
+    bool isReleased()           //returns true if button is released
     {
       return flag.released;
     }
 
-    uint8_t hasClicks()         //returns clicks after stopping clicking
+    uint8_t hasClicks()         //returns clicks after clicking strike ends
     {
-      return _clicksEnd;
+      return (flag.clicksEnd) ? _clicks : 0;
     }
-    uint8_t hasClicksNow()      //returns clicks
+    uint8_t hasClicksNow()      //returns clicks during clicking
     {
       return _clicks - flag.pressed;
     }
-    uint8_t hasClicksWithHeld() //returns clicks before pressing
+    uint8_t hasClicksWithHeld() //returns clicks before holding
     {
       return (flag.held) ? _clicks - 1 : 0;
     }
-    uint8_t hasClicksWithHold() //returns clicks before holding
+    uint8_t hasClicksWithHold() //returns clicks during holding
     {
-      return (flag.hold) ? _clicks - 1 : 0;
+      return isHold() ? _clicks - 1 : 0;
     }
 
-    uint16_t holdingTime()      //returns holding time after released
+    uint16_t holdingTime()      //returns press time
     {
       return (flag.pressed) ? EMFB_MILLIS_FUNC - _timer : 0;
     }
-    uint16_t holdinMillis()     //returns pressing time
+    uint16_t holdinMillis()     //returns whole press time after releasing
     {
-      return (flag.released && !mode) ? _timer : 0;
+      return (flag.released) ? EMFB_MILLIS_FUNC - _timer : 0;
     }
 
     bool hasSingle()            //returns true if button is clicked once
     {
-      return _clicksEnd == 1;
+      return hasClicks() == 1;
     }
     bool hasDouble()            //returns true if button is clicked twice
     {
-      return _clicksEnd == 2;
+      return hasClicks() == 2;
     }
     bool hasTriple()            //returns true if button is clicked three times
     {
-      return _clicksEnd == 3;
+      return hasClicks() == 3;
     }
 
     EMFButton(uint8_t Npin, bool Npinmode = 0, bool Npinclosed = 0)
     {
       _pin = Npin;
-      flag.pinmode = Npinmode;
-      flag.pinclosed = Npinclosed;
-      EMFB_SETUP_FUNC(_pin, flag.pinmode);
+      flag.pinmode = !Npinmode ^ Npinclosed; //pinmode says what signal are "pressed button", pinclosed inverse value if it is set
+      EMFB_SETUP_FUNC(_pin, Npinmode);
     }
 #ifdef EMFB_USE_CALLBACKS
     void attach(uint8_t id, void (*handler)())
     {
-      _callback[id] = *handler;
+      _callback[id] = handler;
     }
     void detach(uint8_t id)
     {
@@ -145,13 +143,20 @@ class EMFButton {
 #endif
     void tick()                 // obligatory function(reading button state)
     {
+      uint16_t t = EMFB_MILLIS_FUNC;
+
       flag.clicked = 0;
       flag.held = 0;
-      flag.hold = 0;
-      flag.released = 0;
-      _clicksEnd = 0;
-      uint16_t t = EMFB_MILLIS_FUNC;
-      bool reading = (!flag.pinclosed)^ EMFB_READ_FUNC(_pin, flag.pinmode);
+      if (flag.released) {
+        flag.released = 0;
+        _timer = t;
+      }
+      if (flag.clicksEnd) {
+        flag.clicksEnd = 0;
+        _clicks = 0;
+      };
+
+      bool reading = EMFB_READ_FUNC(_pin, flag.pinmode);
 #ifdef EMFB_WITHOUT_DEBOUNCE
       flag.pressed = reading;
 #else
@@ -161,30 +166,25 @@ class EMFButton {
       }
       if (t - _lastChange > EMFB_DEB_TIMER)
       {
+        flag.pressed = reading;
 #endif
-        flag.pressed = !reading;
-
-        if (flag.pressed)
+      if (flag.pressed)
+      {
+        switch (mode)
         {
-          switch (mode)
-          {
-            case await:
-              mode = pressed;
-              _timer = t;
-              _clicks = 1;
-              flag.clicked = 1;
-              break;
+          case await:
+            mode = pressed;
+            _timer = t;
+            _clicks = 1;
+            flag.clicked = 1;
+          break;
 
-            case pressed:
-              if (t - _timer >= EMFB_HOLD_TIMER)
-              {
-                mode = held;
-                flag.held = 1;
-              }
-            break;
-
-          case held:
-            flag.hold = 1;
+          case pressed:
+            if (t - _timer >= EMFB_HOLD_TIMER)
+            {
+              mode = held;
+              flag.held = 1;
+            }
           break;
 
           case released:
@@ -193,7 +193,7 @@ class EMFButton {
             _clicks ++;
             flag.clicked = 1;
           break;
-         }
+        }
       }
       else
       {
@@ -204,18 +204,26 @@ class EMFButton {
             if (_clicks == 15)
             {
               mode = await;
-              _clicksEnd = _clicks;
-              _clicks = 0;
-            } else { mode = released; _timer = t; } break;
+              flag.clicksEnd = 1;
+            }
+            else
+            {
+              mode = released;
+            }
+          break;
 
-          case held: { mode = await; _timer = t - _timer; _clicks = 0; flag.released = 1;} break;
+          case held:
+            mode = await;
+            _clicks = 0;
+            flag.released = 1;
+          break;
 
-          case released: if (t - _timer >= EMFB_RELEASE_TIMER) {
+          case released:
+            if (t - _timer >= EMFB_RELEASE_TIMER) {
               mode = await;
-              _timer = t;
-              _clicksEnd = _clicks;
-              _clicks = 0;
-            } break;
+              flag.clicksEnd = 1;
+            }
+          break;
         }
       }
 #ifndef EMFB_WITHOUT_DEBOUNCE
@@ -223,33 +231,32 @@ class EMFButton {
     flag.lastState = reading;
 #endif
 #ifdef EMFB_USE_CALLBACKS
-  if (flag.clicked) call(C_CLICKED);
-  if (flag.held) call(C_HELD);
-  if (flag.released) call(C_RELEASED);
-  if (_clicksEnd) call(C_ENDCLICKS);
+    if (flag.clicked) call(C_CLICKED);
+    if (flag.held) call(C_HELD);
+    if (flag.released) call(C_RELEASED);
+    if (flag.clicksEnd) call(C_ENDCLICKS);
 #endif
-  };
+};
 
-  private:
-    EMFB_flags flag;
-    uint8_t _pin;
+private:
+  EMFB_flags flag;
+  uint8_t _pin;
 
-    uint8_t _clicks: 4;
-    uint8_t _clicksEnd: 4;
+  uint8_t _clicks: 4;
 
-    enum button_state {await, pressed, held, released} mode: 2;
+  enum button_state {await, pressed, held, released} mode: 2;
 
-    uint16_t _timer;
+  uint16_t _timer;
 #ifndef EMFB_WITHOUT_DEBOUNCE
-    uint16_t _lastChange;
+  uint16_t _lastChange;
 #endif
 #ifdef EMFB_USE_CALLBACKS
-    void (*_callback[4])() = {};
+  void (*_callback[4])() = {};
 
-    void call(uint8_t id)
-    {
-      if (*_callback[id]) _callback[id]();
-    }
+  void call(uint8_t id)
+  {
+    if (*_callback[id]) _callback[id]();
+  }
 #endif
 };
 #endif
