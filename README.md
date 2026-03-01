@@ -1,9 +1,9 @@
 # EasyMultiFunctionalButton
 
 ![License](https://img.shields.io/badge/License-MIT-blue)
-![Tests](https://img.shields.io/github/languages/top/80Stepko08/EMFButton)
+![Tests](https://img.shields.io/github/languages/top/St3p40/EMFButton)
 [![arduino-library-badge](https://www.ardu-badge.com/badge/EMFButton.svg?)](https://www.ardu-badge.com/EMFButton)
-![Tests](https://img.shields.io/github/last-commit/80Stepko08/EMFButton)
+![Tests](https://img.shields.io/github/last-commit/St3p40/EMFButton)
 
 Button Press Handling Library
 - Works with normal open and closed buttons with pull-down and pull-up connection
